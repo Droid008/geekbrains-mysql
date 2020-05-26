@@ -1,71 +1,61 @@
-SELECT * FROM target_types;
+INSERT INTO orders (user_id)
+SELECT id FROM users WHERE name = 'Геннадий';
 
 
 
-SELECT * FROM profiles ORDER BY birthday DESC LIMIT 10;
+INSERT INTO orders_products (order_id, product_id, total)
+SELECT LAST_INSERT_ID(), id, 2 FROM products
+WHERE name = 'Intel Core i7-7700';
 
 
 
-SELECT 
-  (SELECT COUNT(*) FROM likes WHERE target_id = profiles.user_id AND target_type_id = 2) AS likes_total  
-  FROM profiles 
-  ORDER BY birthday 
-  DESC LIMIT 10;
-  
-  
-
-SELECT SUM(likes_total) FROM  
-  (SELECT 
-    (SELECT COUNT(*) FROM likes WHERE target_id = profiles.user_id AND target_type_id = 2) AS likes_total  
-    FROM profiles 
-    ORDER BY birthday 
-    DESC LIMIT 10) AS user_likes
-;  
+INSERT INTO orders (user_id)
+SELECT id FROM users WHERE name = 'Мария';
 
 
 
-SELECT COUNT(*) FROM likes 
-  WHERE target_type_id = 2
-    AND target_id IN (SELECT * FROM (
-      SELECT user_id FROM profiles ORDER BY birthday DESC LIMIT 10
-    ) AS sorted_profiles ) 
-;
+INSERT INTO orders_products (order_id, product_id, total)
+SELECT LAST_INSERT_ID(), id, 1 FROM products
+WHERE name IN ('Intel Core i7-7700', 'asus z270h');
 
 
 
-SELECT birthday, user_id, (
-  SELECT COUNT(*) FROM likes WHERE 
-    (target_id IN (SELECT id FROM media WHERE media.user_id=profiles.user_id) AND target_type_id=3) OR 
-    (target_id IN (SELECT id FROM posts WHERE posts.user_id=profiles.user_id) AND target_type_id=4) OR 
-    (target_id IN (SELECT id FROM messages WHERE messages.from_user_id=profiles.user_id) AND target_type_id=1) OR
-    (target_id=profiles.user_id AND target_type_id=2)
-  ) AS likes  FROM profiles ORDER BY birthday DESC LIMIT 10;
+INSERT INTO orders (user_id)
+SELECT id FROM users WHERE name = 'Иван';
 
+
+
+INSERT INTO orders_products (order_id, product_id, total)
+SELECT LAST_INSERT_ID(), id, 1 FROM products
+WHERE name IN ('AMD FX-8320', 'ASUS ROG MAXIMUS X HERO');
+
+
+
+SELECT id, name, birthday_at FROM users;
+
+
+
+SELECT u.id, u.name, u.birthday_at
+  FROM users AS u
+   JOIN orders AS o
+     ON u.id = o.user_id;
+
+     
+     
+
+     
+     
+     
+---------------------------------
 
 
 
 SELECT
-	(SELECT gender FROM profiles WHERE user_id = likes.user_id) AS gender
-    FROM likes; 
-    
-    
+  p.id,
+  p.name,
+  p.price,
+  c.name AS catalog
+  FROM products AS p
+    LEFT JOIN catalogs AS c
+      ON p.catalog_id = c.id;
 
-SELECT
-	(SELECT gender FROM profiles WHERE user_id = likes.user_id) AS gender,
-	COUNT(*) AS total
-    FROM likes
-    GROUP BY gender
-    ORDER BY total DESC
-    LIMIT 1; 
-
-
-
-SELECT 
-  CONCAT(first_name, ' ', last_name) AS user, 
-	(SELECT COUNT(*) FROM likes WHERE likes.user_id = users.id) + 
-	(SELECT COUNT(*) FROM media WHERE media.user_id = users.id) + 
-	(SELECT COUNT(*) FROM messages WHERE messages.from_user_id = users.id) AS overall_activity 
-	  FROM users
-	  ORDER BY overall_activity
-	  LIMIT 10;
-	
